@@ -1,6 +1,4 @@
-from app.core.config import get_settings
+import uvicorn
 
-settings = get_settings()
-
-print(f"App Name:{settings.app_name}")
-print(f"App Enviroment:{settings.gemini_api_key}")
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
