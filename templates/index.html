@@ -3,28 +3,35 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>{{ app_name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 
 <body>
+    <div id="backdrop" class="backdrop hidden"></div>
     <div class="shell">
-        <aside class="sidebar">
-            <div>
-                <div class="brand-badge">FDE Project</div>
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-top">
+                <div class="sidebar-header-row">
+                    <div class="brand-badge">FDE Project</div>
+                    <button id="closeSidebar" class="icon-btn mobile-only" aria-label="Close sidebar">✕</button>
+                </div>
                 <h1>IT Support<br />Agentic RAG</h1>
                 <p class="muted">Private company knowledge first. External web only when evidence is weak.</p>
             </div>
 
             <div class="workflow-card">
                 <h3>LangGraph Workflow</h3>
-                <div class="flow-step">1. Route question</div>
-                <div class="flow-step">2. Retrieve private KB</div>
-                <div class="flow-step">3. Grade evidence</div>
-                <div class="flow-step">4. Web fallback if weak</div>
-                <div class="flow-step">5. Rewrite & retry</div>
-                <div class="flow-step">6. Grounded answer</div>
+                <div class="flow-step"><span class="step-num">1</span> Route question</div>
+                <div class="flow-step"><span class="step-num">2</span> Retrieve private KB</div>
+                <div class="flow-step"><span class="step-num">3</span> Grade evidence</div>
+                <div class="flow-step"><span class="step-num">4</span> Web fallback if weak</div>
+                <div class="flow-step"><span class="step-num">5</span> Rewrite & retry</div>
+                <div class="flow-step"><span class="step-num">6</span> Grounded answer</div>
             </div>
 
             <button id="openUpload" class="secondary-btn">+ Add Company Document</button>
@@ -32,11 +39,31 @@
 
         <main class="main">
             <header class="topbar">
-                <div>
-                    <span class="status-dot"></span>
-                    <span>Enterprise Knowledge Copilot</span>
+                <div class="topbar-left">
+                    <button id="toggleSidebar" class="icon-btn mobile-only" aria-label="Open menu">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="brand-title">
+                        <span class="status-dot"></span>
+                        <span class="brand-name">Enterprise Knowledge Copilot</span>
+                    </div>
                 </div>
-                <span class="pill">Agentic RAG</span>
+                <div class="topbar-right">
+                    <button id="mobileUploadBtn" class="upload-pill-btn mobile-only">+ Upload</button>
+                    <button id="toggleTrace" class="trace-pill-btn mobile-only" aria-label="Toggle trace">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        <span>Trace</span>
+                    </button>
+                    <span class="pill desktop-only">Agentic RAG</span>
+                </div>
             </header>
 
             <section id="chat" class="chat-area">
@@ -44,8 +71,7 @@
                     <div class="avatar">AI</div>
                     <div class="bubble">
                         <strong>How can I help with IT support?</strong>
-                        <p>Try: “How do I connect to the company VPN?” or ask a question that may require current
-                            external vendor information.</p>
+                        <p>Ask about company VPN, password resets, leave policies, or general troubleshooting.</p>
                     </div>
                 </div>
             </section>
@@ -53,19 +79,32 @@
             <section class="composer-wrap">
                 <div class="examples">
                     <button class="example">How do I connect to the company VPN?</button>
+                    <button class="example">What is our employee leave policy?</button>
                     <button class="example">What is our password reset policy?</button>
                     <button class="example">What is the latest Microsoft Teams outage guidance?</button>
                 </div>
                 <form id="chatForm" class="composer">
-                    <textarea id="question" rows="2" placeholder="Ask an IT support question..." required></textarea>
-                    <button type="submit" class="send-btn">Ask Agent</button>
+                    <textarea id="question" rows="1" placeholder="Ask an IT support question..." required></textarea>
+                    <button type="submit" class="send-btn" aria-label="Send question">
+                        <span class="btn-text">Ask Agent</span>
+                        <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
                 </form>
             </section>
         </main>
 
-        <aside class="trace-panel">
-            <h2>Agent Trace</h2>
-            <p class="muted">Watch LangGraph decisions while the request runs.</p>
+        <aside id="tracePanel" class="trace-panel">
+            <div class="trace-header">
+                <div>
+                    <h2>Agent Trace</h2>
+                    <p class="muted">Watch LangGraph decisions in real-time.</p>
+                </div>
+                <button id="closeTrace" class="icon-btn mobile-only" aria-label="Close trace">✕</button>
+            </div>
             <div id="trace" class="trace-list">
                 <div class="empty">No request yet.</div>
             </div>
@@ -79,11 +118,12 @@
     <div id="uploadModal" class="modal hidden">
         <div class="modal-card">
             <div class="modal-head">
-                <h2>Ingest Company Document</h2><button id="closeUpload">×</button>
+                <h2>Ingest Company Document</h2>
+                <button id="closeUpload" aria-label="Close upload modal">✕</button>
             </div>
             <p class="muted">Upload PDF, TXT, Markdown, or DOCX. The document is chunked, embedded, and indexed into
                 Pinecone.</p>
-            <input id="adminKey" type="password" placeholder="Admin API key" />
+            <input id="adminKey" type="password" placeholder="Admin API key" value="change-me" />
             <input id="fileInput" type="file" accept=".pdf,.txt,.md,.docx" />
             <button id="uploadBtn" class="send-btn full">Index Document</button>
             <div id="uploadStatus" class="upload-status"></div>
