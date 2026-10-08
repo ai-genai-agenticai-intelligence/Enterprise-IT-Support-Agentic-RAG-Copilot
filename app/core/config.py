@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     app_name: str = "Enterprise IT Support Agentic RAG Copilot"
     app_env: str = "development"
     openai_api_key: str = ""
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.5-flash-lite"
     tavily_api_key: str = ""
     pinecone_api_key: str = ""
     pinecone_index_name: str = "fde-it-support-rag"

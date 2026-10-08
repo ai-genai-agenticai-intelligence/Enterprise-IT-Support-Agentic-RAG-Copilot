@@ -47,7 +47,7 @@ def llm():
         elif settings.gemini_api_key:
             from langchain_google_genai import ChatGoogleGenerativeAI
             _llm = ChatGoogleGenerativeAI(
-                model="gemini-flash-lite-latest",
+                model=settings.gemini_model or "gemini-1.5-flash",
                 temperature=0,
                 google_api_key=settings.gemini_api_key,
                 max_retries=4,
@@ -77,23 +77,44 @@ def add_trace(state: AgentState, message: str):
 
 
 def safe_invoke_llm(prompt: str, structured_schema=None):
-    client = llm()
-    models_to_try = ["gemini-flash-lite-latest", "gemini-flash-latest"] if settings.gemini_api_key and not settings.openai_api_key else [None]
-    
-    last_error = None
-    for model_name in models_to_try:
-        try:
-            if model_name and hasattr(client, "model"):
-                client.model = model_name
-            if structured_schema:
-                structured_client = client.with_structured_output(structured_schema)
-                return structured_client.invoke(prompt)
-            return client.invoke(prompt)
-        except Exception as e:
-            last_error = e
-            time.sleep(1)
-            continue
-    raise last_error
+    if settings.gemini_api_key and not settings.openai_api_key:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        models_to_try = [
+            settings.gemini_model,
+            "gemini-2.5-flash-lite",
+            "gemini-flash-lite-latest",
+            "gemini-2.5-flash",
+            "gemini-3.8-flash"
+        ]
+        # deduplicate while keeping order
+        seen = set()
+        unique_models = []
+        for m in models_to_try:
+            if m and m not in seen:
+                seen.add(m)
+                unique_models.append(m)
+        
+        last_error = None
+        for model_name in unique_models:
+            try:
+                curr_client = ChatGoogleGenerativeAI(
+                    model=model_name,
+                    temperature=0,
+                    google_api_key=settings.gemini_api_key,
+                    max_retries=0,
+                )
+                if structured_schema:
+                    return curr_client.with_structured_output(structured_schema).invoke(prompt)
+                return curr_client.invoke(prompt)
+            except Exception as e:
+                last_error = e
+                continue
+        raise last_error
+    else:
+        client = llm()
+        if structured_schema:
+            return client.with_structured_output(structured_schema).invoke(prompt)
+        return client.invoke(prompt)
 
 
 def route_question(state: AgentState):
